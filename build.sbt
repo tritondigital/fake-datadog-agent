@@ -1,6 +1,6 @@
 name := "fake-datadog-agent"
 
-version := "1.0"
+version := "1.0.1-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
@@ -47,3 +47,13 @@ pomExtra :=
     <url>git@github.com:tritondigital/fake-datadog-agent.git</url>
     <connection>scm:git:git@github.com:tritondigital/fake-datadog-agent.git</connection>
   </scm>
+  <developers>
+    <developer>
+      <id>plveilleux</id>
+      <name>Pierre-Luc Veilleux</name>
+    </developer>
+    <developer>
+      <id>mmclean</id>
+      <name>Mike McLean</name>
+    </developer>
+  </developers>
