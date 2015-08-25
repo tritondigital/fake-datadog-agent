@@ -2,8 +2,8 @@ package com.tritondigital.datadog
 
 import java.io.IOException
 import java.net.{DatagramPacket, DatagramSocket, SocketException}
+import java.util.{ArrayList, List}
 
-import java.util.{List,ArrayList}
 import scala.util.control.Exception.ignoring
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
@@ -16,6 +16,7 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
 
     server = new DatagramSocket(port)
     server.setReuseAddress(true)
+    server.setSoTimeout(500)
 
     val thread: Thread = new Thread(new Runnable() {
       def run() {
