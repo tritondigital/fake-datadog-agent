@@ -2,14 +2,15 @@ package com.tritondigital.datadog
 
 import java.io.IOException
 import java.net.{DatagramPacket, DatagramSocket, SocketException}
-import java.util.{ArrayList, List}
+import java.util
 
+import scala.collection.JavaConversions._
 import scala.util.control.Exception.ignoring
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
 
   var server: DatagramSocket = _
-  var lastMessages: List[String] = new ArrayList()
+  var lastMessages: util.List[String] = new util.ArrayList()
 
   def start() {
     resetState()
@@ -25,7 +26,8 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
             val receiveData: Array[Byte] = new Array[Byte](1024)
             val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
             server.receive(receivePacket)
-            lastMessages.add(new Predef.String(receivePacket.getData).trim)
+            val message: String = new String(receivePacket.getData).trim
+            lastMessages.addAll(message.split("\\s").toSeq)
           }
         }
       }
