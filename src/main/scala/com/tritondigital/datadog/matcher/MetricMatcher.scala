@@ -15,7 +15,9 @@ class MetricMatcher(name: String, code: String, tags: String) extends TypeSafeMa
         .appendText(name).appendText("|").appendText(code).appendText("|").appendText(tags)
       .appendText("`")
   }
+}
 
+object MetricMatcher {
   def metricOf(name: String, code: String, tags: String): Matcher[String] = {
     new MetricMatcher(name, code, tags)
   }
