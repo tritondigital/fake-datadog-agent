@@ -1,33 +1,39 @@
 package com.tritondigital.datadog
 
 import java.io.IOException
-import java.net.{DatagramPacket, DatagramSocket, SocketException}
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.channels.{DatagramChannel, SelectionKey, Selector}
 import java.util
 
 import scala.collection.JavaConversions._
 import scala.util.control.Exception.ignoring
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
+  private var server: DatagramChannel = null
 
-  var server: DatagramSocket = _
   var lastMessages: util.List[String] = new util.ArrayList()
 
-  def start() {
+  @throws(classOf[IOException])
+  def start(): Unit = {
     resetState()
-
-    server = new DatagramSocket(port)
-    server.setReuseAddress(true)
-    server.setSoTimeout(500)
-
-    val thread: Thread = new Thread(new Runnable() {
-      def run() {
-        ignoring(classOf[IOException]) {
-          while (!server.isClosed) {
-            val receiveData: Array[Byte] = new Array[Byte](1024)
-            val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
-            server.receive(receivePacket)
-            val message: String = new String(receivePacket.getData).trim
-            lastMessages.addAll(message.split("\\s").toSeq)
+    server = DatagramChannel.open
+    server.socket.bind(new InetSocketAddress(port))
+    server.configureBlocking(false)
+    val selector: Selector = Selector.open
+    server.register(selector, SelectionKey.OP_READ)
+    val thread: Thread = new Thread(new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          if (selector.select() <= 0) {
+            val keyIterator: util.Iterator[SelectionKey] = selector.selectedKeys().iterator()
+            while (keyIterator.hasNext) {
+              val key: SelectionKey = keyIterator.next()
+              keyIterator.remove()
+              if (key.isReadable) {
+                read(key.channel().asInstanceOf[DatagramChannel])
+              }
+            }
           }
         }
       }
@@ -36,24 +42,32 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
     thread.start()
   }
 
-  def resetState(): Unit = {
+  private def read(channel: DatagramChannel) {
+    val packet: ByteBuffer = ByteBuffer.allocate(1024)
+    packet.clear
+    try {
+      channel.receive(packet)
+      val message: String = new String(packet.array).trim
+      val split: Array[String] = message.split("\\s")
+      lastMessages.addAll(split.toSeq)
+    }
+    catch {
+      case e: IOException =>  e.printStackTrace()
+    }
+  }
+
+  def resetState() {
     lastMessages.clear()
   }
 
-  def waitForRequest(): Unit = Thread.sleep(waitTime)
-
-  def stop() {
-    server.close()
-    waitForShutdown()
+  def waitForRequest(): Unit = {
+    ignoring(classOf[InterruptedException]) {
+      Thread.sleep(waitTime)
+    }
   }
 
-  def waitForShutdown(): Unit = {
-    try {
-      new DatagramSocket(port).close()
-    }
-    catch {
-      case e: SocketException =>
-        waitForShutdown()
-    }
+  @throws(classOf[IOException])
+  def stop(): Unit = {
+    server.close()
   }
 }
