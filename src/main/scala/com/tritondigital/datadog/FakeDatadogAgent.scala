@@ -14,7 +14,6 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
 
   var lastMessages: util.List[String] = new util.ArrayList()
 
-  @throws(classOf[IOException])
   def start(): Unit = {
     resetState()
     server = DatagramChannel.open
@@ -66,7 +65,6 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
     }
   }
 
-  @throws(classOf[IOException])
   def stop(): Unit = {
     server.close()
   }
