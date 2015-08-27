@@ -1,6 +1,6 @@
 name := "fake-datadog-agent"
 
-version := "1.0.4-SNAPSHOT"
+version := "1.0.4"
 
 scalaVersion := "2.11.7"
 
@@ -24,6 +24,7 @@ sonatypeProfileName := "com.tritondigital"
 
 libraryDependencies ++= Seq(
   "com.indeed" % "java-dogstatsd-client" % "2.0.12",
+  "org.hamcrest" % "hamcrest-all" % "1.3",
   "org.scalatest" %% "scalatest" % "2.2.5" % "test"
 )
 
