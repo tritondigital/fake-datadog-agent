@@ -1,9 +1,9 @@
 package com.tritondigital.datadog.matcher
 
-import com.tritondigital.datadog.matcher.MetricMatcher.metricOf
+import com.tritondigital.datadog.matcher.MetricHamcrestMatcher.metricOf
 import org.scalatest.{FlatSpec, Matchers}
 
-class MetricMatcherTest extends FlatSpec with Matchers {
+class MetricHamcrestMatcherTest extends FlatSpec with Matchers {
 
   "This matcher" should "match a metric with same attributes" in {
     metricOf("name", "code", "tags").matches("name|code|tags") shouldBe true
