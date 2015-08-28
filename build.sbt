@@ -25,7 +25,7 @@ sonatypeProfileName := "com.tritondigital"
 libraryDependencies ++= Seq(
   "com.indeed" % "java-dogstatsd-client" % "2.0.12",
   "org.hamcrest" % "hamcrest-all" % "1.3",
-  "org.scalatest" %% "scalatest" % "2.2.5" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.5"
 )
 
 
