@@ -1,8 +1,6 @@
 package com.tritondigital.datadog
 
-import org.scalatest.BeforeAndAfter
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 
 class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
@@ -76,4 +74,11 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
     datadog.lastMessages should contain only("fake.datadog.agent.gauge:45|g|#environment:env,tag:value")
   }
 
+  it should "multiple metrics " in {
+    client.recordValue("gauge", 45)
+    client.increment("counter")
+    datadog.waitForRequest()
+
+    datadog.lastMessages should contain allOf ("fake.datadog.agent.gauge:45|g|#environment:env", "fake.datadog.agent.counter:1|c|#environment:env")
+  }
 }

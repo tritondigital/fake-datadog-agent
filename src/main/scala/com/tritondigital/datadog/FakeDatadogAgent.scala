@@ -10,8 +10,8 @@ import scala.collection.JavaConversions._
 import scala.util.control.Exception.ignoring
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
+  private var server: DatagramChannel = null
 
-  private var server: DatagramChannel = _
   var lastMessages: util.List[String] = new util.ArrayList()
 
   def start(): Unit = {
@@ -23,8 +23,7 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
     server.register(selector, SelectionKey.OP_READ)
     val thread: Thread = new Thread(new Runnable {
       override def run(): Unit = {
-        var stop = false
-        while (!stop) {
+        while (true) {
           if (selector.select() <= 0) {
             val keyIterator: util.Iterator[SelectionKey] = selector.selectedKeys().iterator()
             while (keyIterator.hasNext) {
@@ -34,7 +33,6 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 100) {
                 read(key.channel().asInstanceOf[DatagramChannel])
               }
             }
-            stop = true
           }
         }
       }
