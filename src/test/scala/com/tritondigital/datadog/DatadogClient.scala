@@ -2,8 +2,8 @@ package com.tritondigital.datadog
 
 import com.timgroup.statsd.NonBlockingStatsDClient
 
-case class DatadogClient(port : Int = 9999, prefix : String = "fake.datadog.agent", host: String = "localhost") {
-  val statsd = new NonBlockingStatsDClient(prefix, host, port, "environment:env")
+case class DatadogClient(port : Int = 9999, prefix : String, suffix : String, host: String = "localhost") {
+  val statsd = new NonBlockingStatsDClient(prefix, host, port, suffix)
 
   def increment(name: String, tag: Option[String] = None): Unit = {
     tag.fold(statsd.increment(name))(statsd.increment(name, _))
