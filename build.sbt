@@ -1,6 +1,6 @@
 name := "fake-datadog-agent"
 
-version := "1.0.8"
+version := "1.1.0"
 
 scalaVersion := "2.11.7"
 

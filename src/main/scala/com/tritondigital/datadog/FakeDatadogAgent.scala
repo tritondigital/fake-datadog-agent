@@ -4,7 +4,7 @@ import java.net.{DatagramPacket, DatagramSocket, SocketException}
 import java.util
 import java.util.concurrent.{CountDownLatch, TimeUnit, TimeoutException}
 
-import scala.Predef
+import collection.JavaConversions._
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   private var server: DatagramSocket = _
@@ -13,6 +13,8 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   private var expectedMessages = 0
 
   var lastMessages = new util.ArrayList[String]
+
+  def firstMessage = lastMessages.head
 
   def start(): Unit = {
     resetState()
@@ -42,8 +44,8 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
     val receiveData = new Array[Byte](1024)
     val receivePacket = new DatagramPacket(receiveData, receiveData.length)
     server.receive(receivePacket)
-    val message = new Predef.String(receivePacket.getData)
-    message.trim.split("\\s").foreach { item =>
+    val message = new String(receivePacket.getData)
+    message.trim.split("\\n").foreach { item =>
       lastMessages.add(item)
       messagesEvent.countDown()
     }

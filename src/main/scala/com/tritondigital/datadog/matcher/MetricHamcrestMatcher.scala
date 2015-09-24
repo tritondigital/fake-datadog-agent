@@ -21,4 +21,10 @@ object MetricHamcrestMatcher {
   def metricOf(name: String, code: String, tags: String): Matcher[String] = {
     new MetricHamcrestMatcher(name, code, tags)
   }
+
+  def eventOf(prefix: String, title: String, text: String, tags: String): Matcher[String] = {
+    val fullTitle = s"$prefix.$title"
+    val name = s"_e\\{${fullTitle.length},${text.length}\\}:$fullTitle"
+    new MetricHamcrestMatcher(name, text, tags)
+  }
 }

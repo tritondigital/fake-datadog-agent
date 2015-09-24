@@ -9,6 +9,10 @@ class MetricHamcrestTest extends FlatSpec with Matchers {
     "name|code|tags" should matchMetric("name", "code", "tags")
   }
 
+  it should "match an event with title and text" in {
+    "_e{12,4}:prefix.title|text|tag1:value1" should matchEvent("prefix.title", "text", "tag1:value1")
+  }
+
   it should "match a metric with regex on name" in {
     "datadog.metric.45|code|tags" should matchMetric("datadog.metric.\\p{Digit}+", "code", "tags")
   }

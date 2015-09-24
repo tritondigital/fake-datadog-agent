@@ -1,16 +1,16 @@
 package com.tritondigital.datadog
 
-import org.scalatest.BeforeAndAfter
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 
 class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
+  val PORT = 9998
 
-  val datadog = new FakeDatadogAgent(9999)
-  val client = new DatadogClient(9999, "fake.datadog.agent", "environment:env")
+  val datadog = new FakeDatadogAgent(PORT)
+  val client = new DatadogClient(port = PORT)("fake.datadog.agent", "environment:env")
 
   before {
+    datadog.expectRequests(1)
     datadog.start()
   }
 
@@ -19,8 +19,7 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   "This client" should "prefix all counters with the default prefix" in {
-    val prefixedClient = new DatadogClient(9999, "some-prefix", "environment:env")
-    datadog.expectRequests(1)
+    val prefixedClient = new DatadogClient(port = PORT)("some-prefix", "environment:env")
     prefixedClient.increment("a-counter")
     datadog.waitForRequest()
 
@@ -28,16 +27,14 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "specify the environment with a tag" in {
-    val suffixedClient = new DatadogClient(9999, "fake.datadog.agent", "some-suffix")
-    datadog.expectRequests(1)
-    suffixedClient.recordDuration("gauge", 42)
+    val suffixedClient = new DatadogClient(port = PORT)("some-prefix")
+    suffixedClient.recordDuration("gauge", 42, "environment:env")
     datadog.waitForRequest()
 
-    all (datadog.lastMessages) should endWith("|#some-suffix")
+    all (datadog.lastMessages) should endWith("|#environment:env")
   }
 
   it should "increment a counter" in {
-    datadog.expectRequests(1)
     client.increment("some-counter")
     datadog.waitForRequest()
 
@@ -45,7 +42,6 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "record a duration value" in {
-    datadog.expectRequests(1)
     client.recordDuration("any-duration", 42)
     datadog.waitForRequest()
 
@@ -53,7 +49,6 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "record a gauge value" in {
-    datadog.expectRequests(1)
     client.recordValue("my-gauge", 1204)
     datadog.waitForRequest()
 
@@ -61,36 +56,35 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "support tags for counter" in {
-    datadog.expectRequests(1)
-    client.increment("counter", Some("tag:value"))
+    client.increment("counter", "tag:value")
     datadog.waitForRequest()
 
     datadog.lastMessages should contain only("fake.datadog.agent.counter:1|c|#environment:env,tag:value")
   }
 
   it should "support tags for duration" in {
-    datadog.expectRequests(1)
-    client.recordDuration("duration", 45, Some("tag:value"))
+    client.recordDuration("duration", 45, "tag:value")
     datadog.waitForRequest()
 
     datadog.lastMessages should contain only("fake.datadog.agent.duration:45|ms|#environment:env,tag:value")
   }
 
   it should "support tags for gauge" in {
-    datadog.expectRequests(1)
-    client.recordValue("gauge", 45, Some("tag:value"))
+    client.recordValue("gauge", 45, "tag:value")
     datadog.waitForRequest()
 
     datadog.lastMessages should contain only("fake.datadog.agent.gauge:45|g|#environment:env,tag:value")
   }
 
-  it should "support multiple metrics" in {
-    datadog.expectRequests(2)
-    client.recordValue("gauge", 45, Some("tag:value"))
-    client.increment("counter", Some("tag:value"))
+  it should "support multiple metrics across different metric types" in {
+    client.recordValue("gauge", 45)
+    client.increment("counter")
+    client.recordEvent("my title", "my text")
     datadog.waitForRequest()
 
-    datadog.lastMessages should contain allOf ("fake.datadog.agent.gauge:45|g|#environment:env,tag:value", "fake.datadog.agent.counter:1|c|#environment:env,tag:value")
+    datadog.lastMessages should contain allOf ("fake.datadog.agent.gauge:45|g|#environment:env",
+      "fake.datadog.agent.counter:1|c|#environment:env",
+      "_e{27,7}:fake.datadog.agent.my title|my text|#environment:env")
   }
 
   it should "support awaiting for no requests" in {
@@ -100,4 +94,10 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
     datadog.lastMessages should not be empty
   }
 
+  it should "support events with text and a title" in {
+    client.recordEvent("my title", "my text", "tag:value", "tag2:value2")
+    datadog.waitForRequest()
+
+    datadog.lastMessages should contain only("_e{27,7}:fake.datadog.agent.my title|my text|#environment:env,tag2:value2,tag:value")
+  }
 }

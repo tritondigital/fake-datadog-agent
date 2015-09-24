@@ -1,6 +1,6 @@
 package com.tritondigital.datadog.matcher
 
-import com.tritondigital.datadog.matcher.MetricHamcrestMatcher.metricOf
+import com.tritondigital.datadog.matcher.MetricHamcrestMatcher.{eventOf, metricOf}
 import org.scalatest.{FlatSpec, Matchers}
 
 class MetricHamcrestMatcherTest extends FlatSpec with Matchers {
@@ -18,17 +18,18 @@ class MetricHamcrestMatcherTest extends FlatSpec with Matchers {
   }
 
   it should "not match a metric with different code" in {
-
     metricOf("name", "code", "tags").matches("name|different|tags") shouldBe false
   }
 
   it should "not match a metric with different tags" in {
-
     metricOf("name", "code", "tags").matches("name|tags|different") shouldBe false
   }
 
   it should "not match a metric with all different attributes" in {
-
     metricOf("name", "code", "tags").matches("riri|fifi|loulou") shouldBe false
+  }
+
+  it should "match an event with the same attributes" in {
+    eventOf("prefix", "title", "text", "tags").matches("_e{12,4}:prefix.title|text|tags") shouldBe true
   }
 }
