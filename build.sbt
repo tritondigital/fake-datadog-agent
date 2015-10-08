@@ -16,18 +16,17 @@ startYear := Some(2015)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-crossScalaVersions := Seq("2.10.5", "2.11.7")
+crossScalaVersions := Seq("2.10.6", "2.11.7")
 
 publishMavenStyle := true
 
 sonatypeProfileName := "com.tritondigital"
 
 libraryDependencies ++= Seq(
-  "com.indeed" % "java-dogstatsd-client" % "2.0.12",
+  "com.indeed" % "java-dogstatsd-client" % "2.0.12" % "test",
   "org.hamcrest" % "hamcrest-all" % "1.3",
   "org.scalatest" %% "scalatest" % "2.2.5"
 )
-
 
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
