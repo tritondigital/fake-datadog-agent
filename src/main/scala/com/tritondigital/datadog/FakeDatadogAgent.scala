@@ -4,9 +4,11 @@ import java.net.{DatagramPacket, DatagramSocket, SocketException}
 import java.util
 import java.util.concurrent.{CountDownLatch, TimeUnit, TimeoutException}
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
+  private val DOGSTATSD_PACKET_SIZE: Int = 1500
+
   private var server: DatagramSocket = _
   private var messagesEvent: CountDownLatch = _
   private var stopEvent: CountDownLatch = _
@@ -41,7 +43,7 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   }
 
   def readMessages(): Unit = {
-    val receiveData = new Array[Byte](1024)
+    val receiveData = new Array[Byte](DOGSTATSD_PACKET_SIZE)
     val receivePacket = new DatagramPacket(receiveData, receiveData.length)
     server.receive(receivePacket)
     val message = new String(receivePacket.getData)
@@ -62,7 +64,7 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   }
 
   def waitForRequest(): Unit = {
-    if(expectedMessages == 0) {
+    if (expectedMessages == 0) {
       Thread.sleep(waitTime)
     } else {
       if (!messagesEvent.await(waitTime, TimeUnit.MILLISECONDS)) {
