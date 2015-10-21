@@ -22,10 +22,15 @@ publishMavenStyle := true
 
 sonatypeProfileName := "com.tritondigital"
 
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
+
+autoScalaLibrary := false
+
 libraryDependencies ++= Seq(
+  "org.scala-lang" % "scala-library" % scalaVersion.value % "test",
   "com.indeed" % "java-dogstatsd-client" % "2.0.12" % "test",
-  "org.hamcrest" % "hamcrest-all" % "1.3",
-  "org.scalatest" %% "scalatest" % "2.2.5"
+  "org.hamcrest" % "hamcrest-all" % "1.3" % "compile, optional",
+  "org.scalatest" %% "scalatest" % "2.2.5" % "compile, optional"
 )
 
 publishTo := {
@@ -38,7 +43,7 @@ publishTo := {
 
 publishArtifact in Test := false
 
-credentials += Credentials("Sonatype Nexus Repository Manager","oss.sonatype.org",System.getenv("SONATYPE_USERNAME"),System.getenv("SONATYPE_PASSWORD"))
+credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", System.getenv("SONATYPE_USERNAME"), System.getenv("SONATYPE_PASSWORD"))
 
 pomIncludeRepository := { _ => false }
 
