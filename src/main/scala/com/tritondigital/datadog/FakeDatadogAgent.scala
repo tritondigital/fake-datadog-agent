@@ -4,8 +4,6 @@ import java.net.{DatagramPacket, DatagramSocket, SocketException}
 import java.util
 import java.util.concurrent.{CountDownLatch, TimeUnit, TimeoutException}
 
-import scala.collection.JavaConversions._
-
 class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   private val DOGSTATSD_PACKET_SIZE: Int = 1500
 
@@ -15,8 +13,6 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
   private var expectedMessages = 0
 
   var lastMessages = new util.ArrayList[String]
-
-  def firstMessage = lastMessages.head
 
   def start(): Unit = {
     resetState()
