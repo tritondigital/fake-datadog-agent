@@ -1,14 +1,18 @@
 package com.tritondigital.datadog
 
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.util.Random
 
-class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
+class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter with BeforeAndAfterAll {
   val PORT = 9998
 
   val datadog = new FakeDatadogAgent(PORT)
-  val client = new DatadogClient(port = PORT)("fake.datadog.agent", "environment:env")
+  var client : DatadogClient = null
+
+  override def beforeAll() {
+    client = new DatadogClient(port = PORT)("fake.datadog.agent", "environment:env")
+  }
 
   before {
     datadog.expectRequests(1)
@@ -19,12 +23,18 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
     datadog.stop()
   }
 
+  override def afterAll {
+    client.statsd.stop()
+  }
+
   "This client" should "prefix all counters with the default prefix" in {
     val prefixedClient = new DatadogClient(port = PORT)("some-prefix", "environment:env")
     prefixedClient.increment("a-counter")
     datadog.waitForRequest()
 
     all(datadog.lastMessages) should startWith("some-prefix.")
+
+    prefixedClient.statsd.stop()
   }
 
   it should "specify the environment with a tag" in {
@@ -33,6 +43,8 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
     datadog.waitForRequest()
 
     all(datadog.lastMessages) should endWith("|#environment:env")
+
+    suffixedClient.statsd.stop()
   }
 
   it should "increment a counter" in {
@@ -100,11 +112,11 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "support multiple metrics across different metric types" in {
+    datadog.expectRequests(3)
     client.recordValue("gauge", 45)
     client.increment("counter")
     client.recordEvent("mytitle", "mytext")
     datadog.waitForRequest()
-
 
     datadog.lastMessages should contain("fake.datadog.agent.gauge:45|g|#environment:env")
     datadog.lastMessages should contain("fake.datadog.agent.counter:1|c|#environment:env")
