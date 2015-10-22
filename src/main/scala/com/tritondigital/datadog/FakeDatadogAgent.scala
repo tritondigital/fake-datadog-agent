@@ -43,7 +43,6 @@ class FakeDatadogAgent(port: Int, waitTime: Int = 1000) {
     val receivePacket = new DatagramPacket(receiveData, receiveData.length)
     server.receive(receivePacket)
     val message = new String(receivePacket.getData)
-    //System.out.println(message)
     message.trim.split("\\n").foreach { item =>
       lastMessages.add(item)
       messagesEvent.countDown()
