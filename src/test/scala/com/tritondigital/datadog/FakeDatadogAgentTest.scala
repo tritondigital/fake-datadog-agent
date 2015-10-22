@@ -77,17 +77,6 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
     datadog.lastMessages should contain only "fake.datadog.agent.gauge:45|g|#environment:env,tag:value"
   }
 
-  it should "support multiple metrics across different metric types" in {
-    client.recordValue("gauge", 45)
-    client.increment("counter")
-    client.recordEvent("my title", "my text")
-    datadog.waitForRequest()
-
-    datadog.lastMessages should contain allOf("fake.datadog.agent.gauge:45|g|#environment:env",
-      "fake.datadog.agent.counter:1|c|#environment:env",
-      "_e{27,7}:fake.datadog.agent.my title|my text|#environment:env")
-  }
-
   it should "support awaiting for no requests" in {
     datadog.expectRequests(0)
     client.increment("unwanted")
@@ -108,5 +97,17 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     all(datadog.lastMessages) should startWith("fake.datadog.agent.a-huge-name")
     all(datadog.lastMessages) should endWith("the-end:22|g|#environment:env")
+  }
+
+  it should "support multiple metrics across different metric types" in {
+    client.recordValue("gauge", 45)
+    client.increment("counter")
+    client.recordEvent("mytitle", "mytext")
+    datadog.waitForRequest()
+
+
+    datadog.lastMessages should contain("fake.datadog.agent.gauge:45|g|#environment:env")
+    datadog.lastMessages should contain("fake.datadog.agent.counter:1|c|#environment:env")
+    datadog.lastMessages should contain("_e{26,6}:fake.datadog.agent.mytitle|mytext|#environment:env")
   }
 }
