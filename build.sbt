@@ -1,6 +1,6 @@
 name := "fake-datadog-agent"
 
-version := "1.1.0"
+version := "1.2.0"
 
 scalaVersion := "2.11.7"
 
@@ -24,10 +24,7 @@ sonatypeProfileName := "com.tritondigital"
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
-autoScalaLibrary := false
-
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-library" % scalaVersion.value % "test",
   "com.indeed" % "java-dogstatsd-client" % "2.0.12" % "test",
   "org.hamcrest" % "hamcrest-all" % "1.3" % "compile, optional",
   "org.scalatest" %% "scalatest" % "2.2.5" % "compile, optional"
