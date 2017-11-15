@@ -103,8 +103,8 @@ class FakeDatadogAgentTest extends FlatSpec with Matchers with BeforeAndAfter wi
     datadog.lastMessages should contain only "_e{27,7}:fake.datadog.agent.my title|my text|#environment:env,tag2:value2,tag:value"
   }
 
-  it should "read messages up to 1500 bytes (just like those java-dogstatsd-client can write)" in {
-    client.recordValue("a-huge-name-" + Random.alphanumeric.take(1438).mkString + "-the-end", 22);
+  it should "read messages up to 1399 bytes (just like those java-dogstatsd-client can write)" in {
+    client.recordValue("a-huge-name-" + Random.alphanumeric.take(1338).mkString + "-the-end", 22)
     datadog.waitForRequest()
 
     all(datadog.lastMessages) should startWith("fake.datadog.agent.a-huge-name")

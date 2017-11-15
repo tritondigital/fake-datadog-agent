@@ -1,8 +1,8 @@
 name := "fake-datadog-agent"
 
-version := "1.3.0-SNAPSHOT"
+version := "1.3.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.4"
 
 organization := "com.tritondigital"
 
@@ -16,7 +16,7 @@ startYear := Some(2015)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-crossScalaVersions := Seq("2.10.6", "2.11.7")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4")
 
 publishMavenStyle := true
 
@@ -25,9 +25,9 @@ sonatypeProfileName := "com.tritondigital"
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 libraryDependencies ++= Seq(
-  "com.indeed" % "java-dogstatsd-client" % "2.0.12" % "test",
+  "com.datadoghq" % "java-dogstatsd-client" % "2.3" % "test",
   "org.hamcrest" % "hamcrest-all" % "1.3" % "compile, optional",
-  "org.scalatest" %% "scalatest" % "2.2.5" % "compile, optional"
+  "org.scalatest" %% "scalatest" % "3.0.4" % "compile, optional"
 )
 
 publishTo := {
